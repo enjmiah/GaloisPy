@@ -1,4 +1,4 @@
-Galois4
+GaloisPy
 ===================
 
 A Python library for computations involving finite Galois fields.
@@ -83,7 +83,7 @@ All methods are pure functions (they do not have side effects).
 
 ### Encoding and decoding
 
-+ `encode(G, w)` encodes codeword `w` with generator matrix `G`
++ `encode(G, w)` returns the codeword from encoding word `w` with generator matrix `G`
 + `is_generator_matrix(M)` returns `True` if and only if `M` is a valid generator matrix
 + `is_standard_form(M, 'g')` returns `True` if and only if `M` is a valid generator matrix in standard form
 + `is_standard_form(M, 'p')` returns `True` if and only if `M` is a valid parity-check matrix in standard form
@@ -96,9 +96,7 @@ All methods are pure functions (they do not have side effects).
 
 ### Step-by-step solutions
 
-An important feature in GaloisPy is the ability to see step-by-step solutions.
-Whether or not you see step-by-step solutions is determined by the `verbose`
-member of the created `GF` instance.
+An important feature in **GaloisPy** is the ability to see step-by-step solutions.  Whether or not you see step-by-step solutions is determined by the `verbose` member of the created `GF` instance.
 
 You can specify this when you create the field.  Alternately, you can change the `verbose` member at any time.
 
@@ -108,7 +106,7 @@ You can specify this when you create the field.  Alternately, you can change the
 >>> GF7.verbose = True
 ```
 
-You can also pass an additional verbose argument to methods that support it.
+You can also pass an additional `verbose` argument to methods that support it.
 This takes precedence over the value of the `verbose` member.
 
 ```python

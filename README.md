@@ -6,6 +6,16 @@ A Python library for computations involving finite Galois fields.
 Written in Python 3.  Experimental support for Python 2.
 
 
+### Jump to:
+
++ [Usage](#usage)
+  + [Creating a field](#creating-a-field)
+  + [Basic operations](#basic-operations)
+  + [Encoding and decoding](#encoding-and-decoding)
+  + [Step-by-step solutions](#step-by-step-solutions)
++ [Contributing](#contributing)
+
+
 
 <br>
 

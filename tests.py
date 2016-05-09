@@ -321,16 +321,16 @@ class TestVerbose(unittest.TestCase):
         # GF103 = GF(103)
         # GF103.mult_inverse(63, verbose=True)
         
-        GF983 = GF(983)
-        GF983.mult_inverse(444, verbose=True)
+        # GF983 = GF(983)
+        # GF983.mult_inverse(444, verbose=True)
     
     def test_rref(self):
         pass
-        # M_2 = [[0, 0, b, 0],
-        #        [0, 0, 0, 0],
-        #        [a, 0, b, 1],
-        #        [1, 0, a, b]]
-        # GF4.rref(M_2, verbose=True)
+        M_2 = [[0, 0, b, 0],
+               [0, 0, 0, 0],
+               [a, 0, b, 1],
+               [1, 0, a, b]]
+        GF4.rref(M_2, verbose=True)
 
 if __name__ == '__main__':
     unittest.main()

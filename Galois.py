@@ -1,3 +1,4 @@
+from __future__ import print_function
 """
 GaloisPy
 A Python library for computations involving finite fields
@@ -155,7 +156,7 @@ class GF:
         else:
             raise NotImplementedError();
     
-    def _prime_field_mult_inverse(self, a, verbose=None): # TODO: verbose
+    def _prime_field_mult_inverse(self, a, verbose=None):
         """
         Calculate the inverse of a in the field GF(n) where n is prime, using
         the Euclidean Algorithm in reverse.
@@ -213,11 +214,11 @@ class GF:
     def _mult_vec(self, u, v):
         return [self.mult_scalar(a, b) for a,b in zip(u, v)]
 
-    def is_generator_matrix(self, A):
+    def is_generator_matrix(self, M):
         """
-        Returns true iff A is a generator matrix (has linearly independent rows)
+        Returns true iff M is a generator matrix (has linearly independent rows)
         """
-        return self.is_lin_indep(A)
+        return self.is_lin_indep(M)
         
     def is_pc_matrix(self, A, B, verbose=None):
         """
@@ -321,7 +322,7 @@ class GF:
                 below = M[i][n]
                 if below != 0:
                     multiplier = self.negative(
-                        self.mult_scalar(self.mult_inverse(pivot), below)
+                        self.mult_scalar(self.mult_inverse(pivot, False), below)
                         )
                     add_row(m, multiplier, i)
         
@@ -338,14 +339,15 @@ class GF:
                 above = M[i][n]
                 if above != 0:
                     multiplier = self.negative(
-                        self.mult_scalar(self.mult_inverse(pivot), above)
+                        self.mult_scalar(self.mult_inverse(pivot, False), above)
                         )
                     add_row(m, multiplier, i)
         
         def reduce_row(m, n):
             pivot = M[m][n]
-            M[m] = self.scale_vec(self.mult_inverse(pivot), M[m])
-            self._v_printM(M, "Scale row %s." % (m+1), verbose)
+            scale = self.mult_inverse(pivot, False)
+            M[m] = self.scale_vec(scale, M[m])
+            self._v_printM(M, "Scale row %s by %s." % (m+1, scale), verbose)
         
         self._v_printM(M, "Original matrix.", verbose)
         pivots = []

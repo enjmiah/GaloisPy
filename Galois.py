@@ -1,24 +1,25 @@
-from functools import reduce
-
 """
 GaloisPy
 A Python library for computations involving finite fields
-
-@author enjmiah / jerryyin.me
 """
+import copy
+from functools import reduce
+
+__author__ = "enjmiah / jerryyin.me"
+
 
 """
 A finite field.  You can create a field with optional argument verbose as True, 
-    which will have some methods print to the console the steps it took to get 
-    to the answer.  This is useful if you wish to know *how* to get to an answer
-    just as much as what the answer is.  You can change the verbose member any
-    time after initialization as well.
+which will have some methods print to the console the steps it took to get to
+the answer.  This is useful if you wish to know *how* to get to an answer just
+as much as what the answer is.  You can change the verbose member any time
+after initialization as well.
     
-    Usage:
-    >>> GF2 = GF(2)
-    >>> GF4 = GF(4, verbose=True)
-    >>> GF7 = GF(7)
-    >>> GF7.verbose = True
+Usage:
+>>> GF2 = GF(2)
+>>> GF4 = GF(4, verbose=True)
+>>> GF7 = GF(7)
+>>> GF7.verbose = True
 """
 class GF:
     size = 0
@@ -37,7 +38,7 @@ class GF:
             raise NotImplementedError()
         
     def identity(self, x):
-        """Returns an equivalent scalar in the field, if possible"""
+        """Returns an equivalent scalar or vector in the field, if possible"""
         if isinstance(x, list):
             return [self.identity(a) for a in x]
         else:
@@ -74,6 +75,7 @@ class GF:
             raise NotImplementedError()
     
     def add(self, x, y):
+        """Add two scalars or vectors x and y and return the result."""
         if isinstance(x, list) and isinstance(y, list):
             if len(x) != len(y):
                 raise ValueError("Tried to add vectors of different dimensions")
@@ -89,8 +91,10 @@ class GF:
             if x == y:
                 return 0
 
-            if x == 0 or y == 0:
+            if x == 0:
                 return y
+            elif y == 0:
+                return x
             elif (x == "a" and y == "b") or (x == "b" and y == "a"):
                 return 1
             elif (x == 1 and y == "b") or (x == "b" and y == 1):
@@ -129,18 +133,18 @@ class GF:
     def negative(self, x):
         """
         Returns the additive inverse of scalar or vector x.
-            See add_inverse()
+        See add_inverse()
         """
         return self.add_inverse(x)
 
-    def mult_inverse(self, a):
+    def mult_inverse(self, a, verbose=None):
         """Returns the multiplicative inverse of scalar a"""
         if a == 0:
             raise ZeroDivisionError()
         elif a == 1:
             return 1
         elif self._modular:
-            return self._prime_field_mult_inverse(a % self.size, False)
+            return self._prime_field_mult_inverse(a % self.size, verbose)
         elif self.size == 4:
             if a == "a":
                 return "b"
@@ -150,61 +154,64 @@ class GF:
                 raise TypeError("Value %s was not in GF(4)." % a)
         else:
             raise NotImplementedError();
-
+    
     def _prime_field_mult_inverse(self, a, verbose=None): # TODO: verbose
         """
-        Calculate the inverse of a in the field GF(n) where n is prime, using the
-        Euclidean Algorithm
+        Calculate the inverse of a in the field GF(n) where n is prime, using
+        the Euclidean Algorithm in reverse.
         """
+        if a == 0:
+            raise ZeroDivisionError("0 is not invertible.")
+        
+        self._v_print("", verbose)
         t = 0
         r = self.size
         newt = 1
         newr = a
+        MSG1 = "%s = %s * %s + %s"
+        MSG2 = "   ==>   %s = %s - %s * %s"
+        MSG3 = "   ==>   t = %s - %s * %s = %s"
         while newr != 0:
             quotient = r // newr
+            remain = (r % newr if newr != 0 else 1)
+            self._v_print(MSG1 % (r, r // newr, newr, remain), verbose, end="")
+            self._v_print(MSG2 % (remain, r, r // newr, newr), verbose, end="")
+            if (r - quotient * newr) != 0:
+                self._v_print(MSG3 % (t, quotient, newt, t - quotient * newt),
+                              verbose)
+            else:
+                self._v_print("", verbose)
             (t, newt) = (newt, t - quotient * newt)
             (r, newr) = (newr, r - quotient * newr)
 
-        if r > 1:
-            return "a is not invertible"
         if t < 0:
             t += self.size
-
+            MSG = u"%s mod %s = %s"
+            self._v_print(MSG % (t - self.size, self.size, t), verbose)
+        self._v_print("Multiplicative inverse is %s"%(t), verbose)
+        
         return t
-
-    def _mult_vec(self, u, v):
-        """Do component-wise multiplication on vectors u and v."""
-        return list(map(self.mult_scalar, u, v))
 
     def add_vec(self, u, v):
         """Add two vectors u and v and returns the result."""
-        return list(map(self.add_scalar, u, v))
+        return [self.add_scalar(a, b) for a,b in zip(u, v)]
 
     def scale_vec(self, a, v):
         """Multiplies vector v by scalar a."""
-        def f(b):
-            return self.mult_scalar(a, b)
-        return list(map(f, v))
+        return [self.mult_scalar(a, b) for b in v]
 
-    def is_lin_indep(self, u, v):
-        """Determine whether vectors u and v are linearly independent."""
-        for i in self.elements:
-            if u == self.scale_vec(i, v):
-                return False
-        return True
-
-    # TODO: generalize to work with sets of more than two vectors
-    def is_lin_indep_set(self, S):
+    def is_lin_indep(self, S):
         """Determine whether a set is linearly independent."""
-        for u in S:
-            for v in S:
-                if not self.is_lin_indep(u, v):
-                    return False
-        return True
+        return self.rank(S) == len(S)
 
     def dot_vec(self, u, v):
         """Return the inner (dot) product of vectors u and v"""
+        if len(u) != len(v):
+            raise ValueError("Vectors must be same length.")
         return reduce(self.add_scalar, self._mult_vec(u, v), 0);
+        
+    def _mult_vec(self, u, v):
+        return [self.mult_scalar(a, b) for a,b in zip(u, v)]
 
     def is_generator_matrix(self, A):
         """
@@ -214,63 +221,103 @@ class GF:
         
     def is_pc_matrix(self, A, B, verbose=None):
         """
-        Returns true iff B is a parity-check matrix of A, where A and B are
-        arrays of row vectors (also arrays).
+        Returns true iff B and A are parity-check matrices of each other.
         """
         for u in A:
             for v in B:
                 if self.dot_vec(u, v) != 0:
-                    self._v_print(u, " and ", v, " are not orthogonal.")
+                    MSG = "%s and %s are not orthogonal."
+                    self._v_print(MSG % (u, v), verbose)
                     return False
         return True
     
     def create_pc_matrix(self, G, verbose=None):
-        """Returns the parity-check matrix for generator matrix G"""
-        # TODO
-        pass
+        """Returns a parity-check matrix for generator matrix G"""
+        rows = len(G)
+        cols = len(G[0])
+        for row in G:
+            if len(row) != cols:
+                raise ValueError("Matrix not valid, check row lengths.")
+        if not self.is_standard_form(G, 'g'):
+            G = self.rref(G)
+        if not self.is_generator_matrix(G):
+            raise ValueError("Passed matrix was not a generator matrix.")
         
-    def create_gen_matrix(self, H, verbose=None):
-        """Returns the generator matrix for parity-check matrix H"""
-        # TODO: (remember to delete zero rows)
-        pass
+        H = self._tranpose(G)
+        H = self.negative(H[rows:])
+        offset = rows # rows == len(H[0])
+        for i in range(len(H)):
+            for j in range(len(H)):
+                H[i].insert(j+offset, 1 if i == j else 0)
+        return H
     
     def is_standard_form(self, M, type="generator"):
         """
         Using 'generator' or 'g' as type, returns True iff M is a generator
-            matrix in standard form.  This is the default behaviour.
-            Using 'parity' or 'p' as type, returns True iff M is a parity-check
-            matrix in standard form.
+        matrix in standard form.  This is the default behaviour.
+        Using 'parity' or 'p' as type, returns True iff M is a parity-check
+        matrix in standard form.
         """
-        # TODO
-        pass
+        rows = len(M)
+        cols = len(M[0])
+        if rows > cols:
+            return False
+        for row in M:
+            if len(row) != cols:
+                return False
+        
+        if type == "generator" or type == "g":
+            for i in range(rows):
+                for j in range(rows):
+                    if (i == j and M[i][j] != 1) or (i != j and M[i][j] != 0):
+                        return False
+            return True
+        elif type == "parity" or type == "p":
+            for i in range(rows):
+                for j in range(rows):
+                    offset = cols - rows
+                    if (i == j and M[i][j+offset] != 1):
+                        return False
+                    if (i != j and M[i][j+offset] != 0):
+                        return False
+            return True
+        else:
+            raise ValueError("type argument must be either 'g', 'generator', 'p', or 'parity'")
         
     def rref(self, M, verbose=None):
         """
-        Converts a matrix M into row echelon form.
-            Note: Unlike most of the other functions in this module, rref() is
-            in-place
+        Returns a reduced row echelon form matrix that is row equivalent to
+        matrix M.
         """
         rows = len(M)
         cols = len(M[0])
         for row in M:
             if len(row) != cols:
                 raise ValueError("Matrix not valid, check row lengths")
-        for i in range(rows):
-            for j in range(cols):
-                M[i][j] = self.identity(M[i][j])
+        M = copy.deepcopy(M)
+        M = self.identity(M)
         
         def exchange_rows(m1, m2):
             if m1 != m2:
                 (M[m1], M[m2]) = (M[m2], M[m1])
+                MSG = "Exchange rows %s and %s."
+                self._v_printM(M, MSG % (m1+1,m2+1), verbose)
         
         def add_row(m1, a, m2):
-            M[m2] = self.add_vec(M[m2], self.scale_vec(a, M[m1]))
+            M[m2] = self.add(M[m2], self.scale_vec(a, M[m1]))
+            MSG = "Added %s times row %s to row %s."
+            self._v_printM(M, MSG % (a,m1+1,m2+1), verbose)
             
         def pivot_down(m, n):
             pivot = M[m][n]
             if pivot == 0:
                 raise Exception("There has been a terrible error in RREF")
+            first = True
             for i in range(m + 1, rows):
+                if first:
+                    MSG = "PLAN: Pivot down from position (%s, %s)" 
+                    self._v_printM(M, MSG % (m+1, n+1), verbose)
+                    first = False
                 below = M[i][n]
                 if below != 0:
                     multiplier = self.negative(
@@ -282,7 +329,12 @@ class GF:
             pivot = M[m][n]
             if pivot == 0:
                 raise Exception("There has been a terrible error in RREF")
+            first = True
             for i in range(m - 1, -1, -1):
+                if first:
+                    MSG = "PLAN: Pivot up from position (%s, %s)"
+                    self._v_printM(M, MSG%(m+1, n+1), verbose)
+                    first = False
                 above = M[i][n]
                 if above != 0:
                     multiplier = self.negative(
@@ -293,8 +345,9 @@ class GF:
         def reduce_row(m, n):
             pivot = M[m][n]
             M[m] = self.scale_vec(self.mult_inverse(pivot), M[m])
+            self._v_printM(M, "Scale row %s." % (m+1), verbose)
         
-        # Turn M into an upper triangular matrix
+        self._v_printM(M, "Original matrix.", verbose)
         pivots = []
         m = 0; n = 0
         while (m < rows and n < cols):
@@ -314,41 +367,58 @@ class GF:
             reduce_row(m, n)      # Scale so that pivot == 0
             pivots.append((m, n)) # Remember pivot
             
-            self._v_printM(M, verbose)
-            
             m += 1; n += 1
 
         for pivot in pivots:
             pivot_up(*pivot)
             
-        self._v_printM(M, verbose)
+        return M
     
     def rank(self, M):
-        """Returns the rank of matrix M"""
-        # TODO
-        pass
+        """Returns the rank (dimension of rowspace) of matrix M"""
+        Mref = self.rref(M)
+        return len([v for v in Mref if any(v)])
     
-    def encode(self, G, c):
-        """Encodes codeword c using generator matrix G"""
-        # TODO
-        pass
+    def encode(self, G, w):
+        """
+        Encodes word w using generator matrix G and returns the result.
         
-    def _v_print(self, str, verbose):
+        Keyword arguments:
+        w -- word of length k (a list of elements in field)
+        G -- a k x n matrix
+        """
+        if len(w) != len(G):
+            raise ValueError("Input word is wrong length.")
+        G = copy.deepcopy(G)
+        for i in range(len(G)):
+            G[i] = self.scale_vec(w[i], G[i])
+        return reduce(self.add, G)
+    
+    def _tranpose(self, M):
+        """Returns transpose of matrix M"""
+        return list(map(list, zip(*M)))
+        
+    def _v_print(self, str, verbose, end="\n"):
         """Prints if verbose is on"""
         verbose = self.verbose if verbose is None else verbose
         if verbose:
-            print(str)
+            print(str, end=end)
     
-    def _v_printM(self, M, verbose):
+    def _v_printM(self, M, str, verbose):
         """Prints a formatted matrix if verbose is on"""
         verbose = self.verbose if verbose is None else verbose
         if verbose:
+            first = True
             print("")
             for row in M:
                 print("|", end = " ")
                 for el in row:
                     print(el, end = " ")
-                print("|")
+                print("|", end = "")
+                if first:
+                    print("   "+str, end = "")
+                    first = False
+                print("")
         
 
 # This function is only used for sizes of finite fields, which tend to be not

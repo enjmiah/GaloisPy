@@ -5,6 +5,9 @@ A Python library for computations involving finite Galois fields.
 
 Written in Python 3.  Experimental support for Python 2.
 
+[Try it online.](https://repl.it/COuf/3)
+
+
 
 ### Jump to:
 
@@ -77,7 +80,7 @@ Many of the functions in **GaloisPy** work with vectors as well:
 ```
 
 Notable functions:
-+ `add_inverse(x)` returns the additive inverse of x
++ `add_inverse(x)` returns the additive inverse of vector or scalar `x`
 + `negative(x)` is another name for `add_inverse(x)`
 + `mult_inverse(a)` returns the multiplicative inverse of scalar `a`
 + `exp_scalar(a, n)` returns a<sup>n</sup> over the field
@@ -85,7 +88,7 @@ Notable functions:
 + `is_lin_indep(S)` returns `True` if and only if `S` is a linearly independent set of vectors
 + `dot_vec(u, v)` returns the dot product of `u` and `v`
 + `rref(M)` returns the RREF of the matrix `M`
-+ `rank(M)` returns the [rank](http://en.wikipedia.org/wiki/Rank_%28linear_algebra%29) of matrix M
++ `rank(M)` returns the [rank](http://en.wikipedia.org/wiki/Rank_%28linear_algebra%29) of matrix `M`
 
 All methods are pure functions (they do not have side effects).
 

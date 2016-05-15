@@ -31,12 +31,16 @@ class GF:
         self.size = size
         self.verbose = verbose
         self._modular = _is_prime(size)
+        self._digits = len(str(size - 1))
         if self._modular == True:
             self.elements = list(range(0, self.size))
         elif self.size == 4:
             self.elements = [0, 1, "a", "b"]
         else:
             raise NotImplementedError()
+    
+    def __repr__(self):
+        return "GF(%d)" % self.size
         
     def identity(self, x):
         """Returns an equivalent scalar or vector in the field, if possible"""
@@ -400,13 +404,13 @@ class GF:
         """Returns transpose of matrix M"""
         return list(map(list, zip(*M)))
         
-    def _v_print(self, str, verbose, end="\n"):
+    def _v_print(self, msg, verbose, end="\n"):
         """Prints if verbose is on"""
         verbose = self.verbose if verbose is None else verbose
         if verbose:
-            print(str, end=end)
+            print(msg, end=end)
     
-    def _v_printM(self, M, str, verbose):
+    def _v_printM(self, M, msg, verbose):
         """Prints a formatted matrix if verbose is on"""
         verbose = self.verbose if verbose is None else verbose
         if verbose:
@@ -415,10 +419,10 @@ class GF:
             for row in M:
                 print("|", end = " ")
                 for el in row:
-                    print(el, end = " ")
+                    print(str(el).rjust(self._digits), end = " ")
                 print("|", end = "")
                 if first:
-                    print("   "+str, end = "")
+                    print("   "+msg, end = "")
                     first = False
                 print("")
         

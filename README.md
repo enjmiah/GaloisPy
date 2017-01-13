@@ -1,6 +1,8 @@
 GaloisPy
 ===================
 
+<img src='https://travis-ci.org/enjmiah/GaloisPy.svg?branch=master' />
+
 A Python library for computations involving finite Galois fields.
 
 Written in Python 3.  Experimental support for Python 2.

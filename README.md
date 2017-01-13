@@ -1,7 +1,9 @@
 GaloisPy
 ===================
 
-<img src='https://travis-ci.org/enjmiah/GaloisPy.svg?branch=master' />
+<a href='https://travis-ci.org/enjmiah/GaloisPy'>
+  <img src='https://travis-ci.org/enjmiah/GaloisPy.svg?branch=master' />
+</a>
 
 A Python library for computations involving finite Galois fields.
 

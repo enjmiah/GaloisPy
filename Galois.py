@@ -26,7 +26,7 @@ class GF:
     size = 0
     verbose = False
     elements = []
-    
+
     def __init__(self, size, verbose=False):
         self.size = size
         self.verbose = verbose
@@ -38,10 +38,10 @@ class GF:
             self.elements = [0, 1, "a", "b"]
         else:
             raise NotImplementedError()
-    
+
     def __repr__(self):
         return "GF(%d)" % self.size
-        
+
     def identity(self, x):
         """Returns an equivalent scalar or vector in the field, if possible"""
         if isinstance(x, list):
@@ -54,8 +54,8 @@ class GF:
                     raise ValueError("Passed value not in GF(4).")
                 return x
             else:
-                raise NotImplementedError();   
-    
+                raise NotImplementedError();
+
     def mult_scalar(self, x, y):
         """Multiply two scalars x and y and return the result."""
         if self._modular:
@@ -78,7 +78,7 @@ class GF:
             raise ValueError("Passed values %s, %s not in GF(4)." % (x, y))
         else:
             raise NotImplementedError()
-    
+
     def add(self, x, y):
         """Add two scalars or vectors x and y and return the result."""
         if isinstance(x, list) and isinstance(y, list):
@@ -87,7 +87,7 @@ class GF:
             return self.add_vec(x, y)
         else:
             return self.add_scalar(x, y)
-    
+
     def add_scalar(self, x, y):
         """Add two scalars x and y and return the result."""
         if self._modular:
@@ -134,7 +134,7 @@ class GF:
                 return x
             else:
                 raise NotImplementedError()
-    
+
     def negative(self, x):
         """
         Returns the additive inverse of scalar or vector x.
@@ -159,7 +159,7 @@ class GF:
                 raise TypeError("Value %s was not in GF(4)." % a)
         else:
             raise NotImplementedError();
-    
+
     def _prime_field_mult_inverse(self, a, verbose=None):
         """
         Calculate the inverse of a in the field GF(n) where n is prime, using
@@ -167,7 +167,7 @@ class GF:
         """
         if a == 0:
             raise ZeroDivisionError("0 is not invertible.")
-        
+
         self._v_print("", verbose)
         t = 0
         r = self.size
@@ -194,7 +194,7 @@ class GF:
             MSG = u"%s mod %s = %s"
             self._v_print(MSG % (t - self.size, self.size, t), verbose)
         self._v_print("Multiplicative inverse is %s"%(t), verbose)
-        
+
         return t
 
     def add_vec(self, u, v):
@@ -214,7 +214,7 @@ class GF:
         if len(u) != len(v):
             raise ValueError("Vectors must be same length.")
         return reduce(self.add_scalar, self._mult_vec(u, v), 0);
-        
+
     def _mult_vec(self, u, v):
         return [self.mult_scalar(a, b) for a,b in zip(u, v)]
 
@@ -223,7 +223,7 @@ class GF:
         Returns true iff M is a generator matrix (has linearly independent rows)
         """
         return self.is_lin_indep(M)
-        
+
     def is_pc_matrix(self, A, B, verbose=None):
         """
         Returns true iff B and A are parity-check matrices of each other.
@@ -235,7 +235,7 @@ class GF:
                     self._v_print(MSG % (u, v), verbose)
                     return False
         return True
-    
+
     def create_pc_matrix(self, G, verbose=None):
         """Returns a parity-check matrix for generator matrix G"""
         rows = len(G)
@@ -247,7 +247,7 @@ class GF:
             G = self.rref(G)
         if not self.is_generator_matrix(G):
             raise ValueError("Passed matrix was not a generator matrix.")
-        
+
         H = self._tranpose(G)
         H = self.negative(H[rows:])
         offset = rows # rows == len(H[0])
@@ -255,7 +255,7 @@ class GF:
             for j in range(len(H)):
                 H[i].insert(j+offset, 1 if i == j else 0)
         return H
-    
+
     def is_standard_form(self, M, type="generator"):
         """
         Using 'generator' or 'g' as type, returns True iff M is a generator
@@ -270,7 +270,7 @@ class GF:
         for row in M:
             if len(row) != cols:
                 return False
-        
+
         if type == "generator" or type == "g":
             for i in range(rows):
                 for j in range(rows):
@@ -288,7 +288,7 @@ class GF:
             return True
         else:
             raise ValueError("type argument must be either 'g', 'generator', 'p', or 'parity'")
-        
+
     def rref(self, M, verbose=None):
         """
         Returns a reduced row echelon form matrix that is row equivalent to
@@ -301,18 +301,18 @@ class GF:
                 raise ValueError("Matrix not valid, check row lengths")
         M = copy.deepcopy(M)
         M = self.identity(M)
-        
+
         def exchange_rows(m1, m2):
             if m1 != m2:
                 (M[m1], M[m2]) = (M[m2], M[m1])
                 MSG = "Exchange rows %s and %s."
                 self._v_printM(M, MSG % (m1+1,m2+1), verbose)
-        
+
         def add_row(m1, a, m2):
             M[m2] = self.add(M[m2], self.scale_vec(a, M[m1]))
             MSG = "Added %s times row %s to row %s."
             self._v_printM(M, MSG % (a,m1+1,m2+1), verbose)
-            
+
         def pivot_down(m, n):
             pivot = M[m][n]
             if pivot == 0:
@@ -320,7 +320,7 @@ class GF:
             first = True
             for i in range(m + 1, rows):
                 if first:
-                    MSG = "PLAN: Pivot down from position (%s, %s)" 
+                    MSG = "PLAN: Pivot down from position (%s, %s)"
                     self._v_printM(M, MSG % (m+1, n+1), verbose)
                     first = False
                 below = M[i][n]
@@ -329,7 +329,7 @@ class GF:
                         self.mult_scalar(self.mult_inverse(pivot, False), below)
                         )
                     add_row(m, multiplier, i)
-        
+
         def pivot_up(m, n):
             pivot = M[m][n]
             if pivot == 0:
@@ -346,13 +346,13 @@ class GF:
                         self.mult_scalar(self.mult_inverse(pivot, False), above)
                         )
                     add_row(m, multiplier, i)
-        
+
         def reduce_row(m, n):
             pivot = M[m][n]
             scale = self.mult_inverse(pivot, False)
             M[m] = self.scale_vec(scale, M[m])
             self._v_printM(M, "Scale row %s by %s." % (m+1, scale), verbose)
-        
+
         self._v_printM(M, "Original matrix.", verbose)
         pivots = []
         m = 0; n = 0
@@ -368,27 +368,27 @@ class GF:
                 # No pivot in column n
                 n += 1
                 continue
-            
+
             pivot_down(m, n)      # Pivot down
             reduce_row(m, n)      # Scale so that pivot == 0
             pivots.append((m, n)) # Remember pivot
-            
+
             m += 1; n += 1
 
         for pivot in pivots:
             pivot_up(*pivot)
-            
+
         return M
-    
+
     def rank(self, M):
         """Returns the rank (dimension of rowspace) of matrix M"""
         Mref = self.rref(M)
         return len([v for v in Mref if any(v)])
-    
+
     def encode(self, G, w):
         """
         Encodes word w using generator matrix G and returns the result.
-        
+
         Keyword arguments:
         w -- word of length k (a list of elements in field)
         G -- a k x n matrix
@@ -399,17 +399,17 @@ class GF:
         for i in range(len(G)):
             G[i] = self.scale_vec(w[i], G[i])
         return reduce(self.add, G)
-    
+
     def _tranpose(self, M):
         """Returns transpose of matrix M"""
         return list(map(list, zip(*M)))
-        
+
     def _v_print(self, msg, verbose, end="\n"):
         """Prints if verbose is on"""
         verbose = self.verbose if verbose is None else verbose
         if verbose:
             print(msg, end=end)
-    
+
     def _v_printM(self, M, msg, verbose):
         """Prints a formatted matrix if verbose is on"""
         verbose = self.verbose if verbose is None else verbose
@@ -425,7 +425,7 @@ class GF:
                     print("   "+msg, end = "")
                     first = False
                 print("")
-        
+
 
 # This function is only used for sizes of finite fields, which tend to be not
 # too large, so the O(sqrt(n)) performance is ok

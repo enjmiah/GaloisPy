@@ -1,0 +1,11 @@
+on: [push]
+
+jobs:
+  linux:
+    name: "Test (Linux)"
+    runs-on: "ubuntu-20.04"
+    timeout-minutes: 15
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run unit tests
+      run: python tests.py

@@ -1,0 +1,18 @@
+[MESSAGES CONTROL]
+disable=fixme,
+        global-statement,
+        invalid-name,
+        locally-disabled,
+        missing-docstring,
+        mixed-indentation,
+        multiple-statements,
+        no-else-return,
+        too-few-public-methods,
+        too-many-arguments,
+        too-many-branches,
+        too-many-public-methods,
+        too-many-locals,
+        too-many-nested-blocks,
+        too-many-statements,
+        wrong-import-position,
+        c-extension-no-member

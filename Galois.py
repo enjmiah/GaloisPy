@@ -32,7 +32,7 @@ class GF:
         self.verbose = verbose
         self._modular = _is_prime(size)
         self._digits = len(str(size - 1))
-        if self._modular == True:
+        if self._modular:
             self.elements = list(range(0, self.size))
         elif self.size == 4:
             self.elements = [0, 1, "a", "b"]
@@ -54,7 +54,7 @@ class GF:
                     raise ValueError("Passed value not in GF(4).")
                 return x
             else:
-                raise NotImplementedError();
+                raise NotImplementedError()
 
     def mult_scalar(self, x, y):
         """Multiply two scalars x and y and return the result."""
@@ -85,8 +85,7 @@ class GF:
             if len(x) != len(y):
                 raise ValueError("Tried to add vectors of different dimensions")
             return self.add_vec(x, y)
-        else:
-            return self.add_scalar(x, y)
+        return self.add_scalar(x, y)
 
     def add_scalar(self, x, y):
         """Add two scalars x and y and return the result."""
@@ -106,6 +105,8 @@ class GF:
                 return "a"
             elif (x == 1 and y == "a") or (x == "a" and y == 1):
                 return "b"
+            else:
+                raise ValueError("%s + %s" % (x, y))
         else:
             raise NotImplementedError()
 
@@ -132,8 +133,7 @@ class GF:
                 return self.size - x
             elif self.size == 4:
                 return x
-            else:
-                raise NotImplementedError()
+            raise NotImplementedError()
 
     def negative(self, x):
         """
@@ -146,7 +146,7 @@ class GF:
         """Returns the multiplicative inverse of scalar a"""
         if a == 0:
             raise ZeroDivisionError()
-        elif a == 1:
+        if a == 1:
             return 1
         elif self._modular:
             return self._prime_field_mult_inverse(a % self.size, verbose)
@@ -157,8 +157,7 @@ class GF:
                 return "a"
             else:
                 raise TypeError("Value %s was not in GF(4)." % a)
-        else:
-            raise NotImplementedError();
+        raise NotImplementedError()
 
     def _prime_field_mult_inverse(self, a, verbose=None):
         """
@@ -199,7 +198,7 @@ class GF:
 
     def add_vec(self, u, v):
         """Add two vectors u and v and returns the result."""
-        return [self.add_scalar(a, b) for a,b in zip(u, v)]
+        return [self.add_scalar(a, b) for a, b in zip(u, v)]
 
     def scale_vec(self, a, v):
         """Multiplies vector v by scalar a."""
@@ -213,10 +212,10 @@ class GF:
         """Return the inner (dot) product of vectors u and v"""
         if len(u) != len(v):
             raise ValueError("Vectors must be same length.")
-        return reduce(self.add_scalar, self._mult_vec(u, v), 0);
+        return reduce(self.add_scalar, self._mult_vec(u, v), 0)
 
     def _mult_vec(self, u, v):
-        return [self.mult_scalar(a, b) for a,b in zip(u, v)]
+        return [self.mult_scalar(a, b) for a, b in zip(u, v)]
 
     def is_generator_matrix(self, M):
         """
@@ -248,12 +247,12 @@ class GF:
         if not self.is_generator_matrix(G):
             raise ValueError("Passed matrix was not a generator matrix.")
 
-        H = self._tranpose(G)
+        H = _transpose(G)
         H = self.negative(H[rows:])
         offset = rows # rows == len(H[0])
         for i in range(len(H)):
             for j in range(len(H)):
-                H[i].insert(j+offset, 1 if i == j else 0)
+                H[i].insert(j + offset, 1 if i == j else 0)
         return H
 
     def is_standard_form(self, M, type="generator"):
@@ -271,13 +270,13 @@ class GF:
             if len(row) != cols:
                 return False
 
-        if type == "generator" or type == "g":
+        if type in ("generator", "g"):
             for i in range(rows):
                 for j in range(rows):
                     if (i == j and M[i][j] != 1) or (i != j and M[i][j] != 0):
                         return False
             return True
-        elif type == "parity" or type == "p":
+        elif type in ("parity", "p"):
             for i in range(rows):
                 for j in range(rows):
                     offset = cols - rows
@@ -306,12 +305,12 @@ class GF:
             if m1 != m2:
                 (M[m1], M[m2]) = (M[m2], M[m1])
                 MSG = "Exchange rows %s and %s."
-                self._v_printM(M, MSG % (m1+1,m2+1), verbose)
+                self._v_printM(M, MSG % (m1 + 1, m2 + 1), verbose)
 
         def add_row(m1, a, m2):
             M[m2] = self.add(M[m2], self.scale_vec(a, M[m1]))
             MSG = "Added %s times row %s to row %s."
-            self._v_printM(M, MSG % (a,m1+1,m2+1), verbose)
+            self._v_printM(M, MSG % (a, m1 + 1, m2 + 1), verbose)
 
         def pivot_down(m, n):
             pivot = M[m][n]
@@ -400,10 +399,6 @@ class GF:
             G[i] = self.scale_vec(w[i], G[i])
         return reduce(self.add, G)
 
-    def _tranpose(self, M):
-        """Returns transpose of matrix M"""
-        return list(map(list, zip(*M)))
-
     def _v_print(self, msg, verbose, end="\n"):
         """Prints if verbose is on"""
         verbose = self.verbose if verbose is None else verbose
@@ -417,12 +412,12 @@ class GF:
             first = True
             print("")
             for row in M:
-                print("|", end = " ")
+                print("|", end=" ")
                 for el in row:
-                    print(str(el).rjust(self._digits), end = " ")
-                print("|", end = "")
+                    print(str(el).rjust(self._digits), end=" ")
+                print("|", end="")
                 if first:
-                    print("   "+msg, end = "")
+                    print("   " + msg, end="")
                     first = False
                 print("")
 
@@ -451,3 +446,8 @@ def _is_prime(n):
         i += w
         w = 6 - w
     return True
+
+
+def _transpose(M):
+    """Returns transpose of matrix M"""
+    return list(map(list, zip(*M)))

@@ -325,8 +325,7 @@ class GF:
                 below = M[i][n]
                 if below != 0:
                     multiplier = self.negative(
-                        self.mult_scalar(self.mult_inverse(pivot, False), below)
-                        )
+                        self.mult_scalar(self.mult_inverse(pivot, False), below))
                     add_row(m, multiplier, i)
 
         def pivot_up(m, n):
@@ -342,8 +341,7 @@ class GF:
                 above = M[i][n]
                 if above != 0:
                     multiplier = self.negative(
-                        self.mult_scalar(self.mult_inverse(pivot, False), above)
-                        )
+                        self.mult_scalar(self.mult_inverse(pivot, False), above))
                     add_row(m, multiplier, i)
 
         def reduce_row(m, n):
@@ -429,13 +427,9 @@ def _is_prime(n):
     Return True iff n is prime
     Source: http://stackoverflow.com/a/1801446
     """
-    if n == 2:
+    if n in (2, 3):
         return True
-    if n == 3:
-        return True
-    if n % 2 == 0:
-        return False
-    if n % 3 == 0:
+    if n % 2 == 0 or n % 3 == 0:
         return False
 
     i = 5

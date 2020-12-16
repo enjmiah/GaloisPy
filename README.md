@@ -1,16 +1,13 @@
 GaloisPy
-===================
+========
 
-<a href='https://travis-ci.org/enjmiah/GaloisPy'>
-  <img src='https://travis-ci.org/enjmiah/GaloisPy.svg?branch=master' />
-</a>
+A pure no-dependencies Python library for computations involving finite Galois
+fields.
 
-A Python library for computations involving finite Galois fields.
-
-Written in Python 3.  Experimental support for Python 2.
+Fully supports all prime-sized fields as well as _GF_(4).  Support for other
+sizes is limited.
 
 [Try it online.](https://repl.it/COuf/3)
-
 
 
 ### Jump to:
@@ -23,22 +20,22 @@ Written in Python 3.  Experimental support for Python 2.
 + [Contributing](#contributing)
 
 
-
-<br>
-
 Usage
 -------------------
 
 ### Creating a field
 
-Use the constructor for the `GF` class to create a finite Galois field, with the size of the field as its first argument.
+Use the constructor for the `GF` class to create a finite Galois field, with the
+size of the field as its first argument.
 
 ```python
 >>> from Galois import *
 >>> GF4 = GF(4)
 ```
 
-The `GF` constructor also accepts an optional second argument, `verbose`, which determines whether or not you wish to see step-by-step solutions.  For more information, see the [Step-by-step solutions](#step-by-step-solutions) section.
+The `GF` constructor also accepts an optional second argument, `verbose`, which
+determines whether or not you wish to see step-by-step solutions.  For more
+information, see the [Step-by-step solutions](#step-by-step-solutions) section.
 
 
 
@@ -54,8 +51,8 @@ Matrices are represented by lists of row vectors:
  [0, 0, 1]]
 ```
 
-Note that **GaloisPy** uses Python primitives as field elements.  The elements *a*
-and *b* in *GF(4)* are represented with the strings `'a'` and `'b'`
+Note that **GaloisPy** uses Python primitives as field elements.  The elements
+*a* and *b* in *GF(4)* are represented with the strings `'a'` and `'b'`
 respectively.  Integers are represented by Python numbers.
 
 To add or multiply two scalars in a field:
@@ -113,9 +110,12 @@ All methods are pure functions (they do not have side effects).
 
 ### Step-by-step solutions
 
-An important feature in **GaloisPy** is the ability to see step-by-step solutions.  Whether or not you see step-by-step solutions is determined by the `verbose` member of the created `GF` instance.
+An important feature in **GaloisPy** is the ability to see step-by-step
+solutions.  Whether or not you see step-by-step solutions is determined by the
+`verbose` member of the created `GF` instance.
 
-You can specify this when you create the field.  Alternately, you can change the `verbose` member at any time.
+You can specify this when you create the field.  Alternately, you can change the
+`verbose` member at any time.
 
 ```python
 >>> GF4 = GF(4, verbose=True)
@@ -223,9 +223,6 @@ Multiplicative inverse is 507
 507
 ```
 
-
-
-<br>
 
 Contributing
 -------------------

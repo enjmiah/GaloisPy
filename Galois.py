@@ -1,28 +1,28 @@
 from __future__ import print_function
 """
-GaloisPy
-A Python library for computations involving finite fields
+Computations involving finite fields.
 """
 import copy
 from functools import reduce
 
-__author__ = "enjmiah / jerryyin.me"
+__author__ = "Jerry Yin"
 
 
-"""
-A finite field.  You can create a field with optional argument verbose as True, 
-which will have some methods print to the console the steps it took to get to
-the answer.  This is useful if you wish to know *how* to get to an answer just
-as much as what the answer is.  You can change the verbose member any time
-after initialization as well.
-    
-Usage:
->>> GF2 = GF(2)
->>> GF4 = GF(4, verbose=True)
->>> GF7 = GF(7)
->>> GF7.verbose = True
-"""
 class GF:
+    """
+    A finite field.  You can create a field with optional argument verbose as
+    True,  which will have some methods print to the console the steps it took
+    to get to the answer.  This is useful if you wish to know *how* to get to an
+    answer just as much as what the answer is.  You can change the verbose
+    member any time after initialization as well.
+
+    Usage:
+
+        GF2 = GF(2)
+        GF4 = GF(4, verbose=True)
+        GF7 = GF(7)
+        GF7.verbose = True
+    """
     size = 0
     verbose = False
     elements = []
